@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="OpenFOAM中常用的数据类型GeometricField最近在改湍流模型时遇到了很多of数据结构的相关问题。非常有必要对基本数据类型的类进行一下整理。并对常用接口做一个总结，方便之后使用。 Overview 首先是OF中的基本变量，相当于标准库中的int，double一类，有scalar，vector，tensor，bool，label。 接下来出现场(Field)的定义，引入标量场scala">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hexo">
+<meta property="og:url" content="http://yoursite.com/2018/03/29/OpenFOAM中常用的数据类型GeometricField/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="OpenFOAM中常用的数据类型GeometricField最近在改湍流模型时遇到了很多of数据结构的相关问题。非常有必要对基本数据类型的类进行一下整理。并对常用接口做一个总结，方便之后使用。 Overview 首先是OF中的基本变量，相当于标准库中的int，double一类，有scalar，vector，tensor，bool，label。 接下来出现场(Field)的定义，引入标量场scala">
+<meta property="og:updated_time" content="2018-03-29T10:13:50.407Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hexo">
+<meta name="twitter:description" content="OpenFOAM中常用的数据类型GeometricField最近在改湍流模型时遇到了很多of数据结构的相关问题。非常有必要对基本数据类型的类进行一下整理。并对常用接口做一个总结，方便之后使用。 Overview 首先是OF中的基本变量，相当于标准库中的int，double一类，有scalar，vector，tensor，bool，label。 接下来出现场(Field)的定义，引入标量场scala">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-OpenFOAM中常用的数据类型GeometricField" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/03/29/OpenFOAM中常用的数据类型GeometricField/" class="article-date">
+  <time datetime="2018-03-29T10:14:30.311Z" itemprop="datePublished">2018-03-29</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="OpenFOAM中常用的数据类型GeometricField"><a href="#OpenFOAM中常用的数据类型GeometricField" class="headerlink" title="OpenFOAM中常用的数据类型GeometricField"></a>OpenFOAM中常用的数据类型GeometricField</h1><p>最近在改湍流模型时遇到了很多of数据结构的相关问题。非常有必要对基本数据类型的类进行一下整理。并对常用接口做一个总结，方便之后使用。</p>
+<h2 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h2><ul>
+<li>首先是OF中的基本变量，相当于标准库中的int，double一类，有scalar，vector，tensor，bool，label。</li>
+<li>接下来出现场(Field)的定义，引入标量场scalarField,vectorField,tensorField,这三种都是typedef Field<scalar> scalarField,定制了一系列运算操作，不涉及量纲计算。此外还有FieldField，这个是定义边界条件用的。</scalar></li>
+<li>最后在of中使用最多的就是几何场类GeometricField</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="class"><span class="keyword">class</span> <span class="title">Type</span>, <span class="title">template</span>&lt;class&gt; <span class="title">class</span> <span class="title">PatchField</span>, <span class="title">class</span> <span class="title">GeoMesh</span>&gt;</span></span><br><span class="line"><span class="class"><span class="title">class</span> <span class="title">GeometricField</span>；</span></span><br></pre></td></tr></table></figure>
+<p>第一个模版参数也就是传入scalar，表示标量几何场，同理，还有向量张量和其他。PatchField下面是在volFieldFwd.H中的数据类型的定义。</p>
+<hr>
+<h2 id="Details-of-volScalarField"><a href="#Details-of-volScalarField" class="headerlink" title="Details of volScalarField"></a>Details of volScalarField</h2><h3 id="volFieldsFwd-H"><a href="#volFieldsFwd-H" class="headerlink" title="//volFieldsFwd.H"></a>//volFieldsFwd.H</h3><p>这个文件位于OpenFOAM-dev/src/finiteVolume/fields/volFields/volFieldsFwd.H，主体是<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> GeometricField&lt;scalar, fvPatchField, volMesh&gt; volScalarField;</span><br><span class="line"><span class="keyword">typedef</span> GeometricField&lt;<span class="built_in">vector</span>, fvPatchField, volMesh&gt; volVectorField;</span><br><span class="line"><span class="keyword">typedef</span> GeometricField&lt;sphericalTensor, fvPatchField, volMesh&gt;</span><br><span class="line">    volSphericalTensorField;</span><br><span class="line"><span class="keyword">typedef</span> GeometricField&lt;symmTensor, fvPatchField, volMesh&gt; volSymmTensorField;</span><br><span class="line"><span class="keyword">typedef</span> GeometricField&lt;tensor, fvPatchField, volMesh&gt; volTensorField;</span><br></pre></td></tr></table></figure></p>
+<p>很容易理解，上述的typedef都是实例化GeometricField的类型。以volScalarField为例，GeometricField&lt;scalar, fvPatchField, volMesh&gt;有三个来模板参数，第一个模版参数不必说，fvPatchField是与边界相关的场量，主要用法是 class Boundary : public FieldField&lt;PatchField, Type&gt;,可以认为是用来在有限体积法中存储边界信息，对应BoundaryField。volMesh顾名思义指网格，用来存储场的主要信息，对应InternalField。<br>接下来来看GeometricField.H这个类是怎样定义和工作的，由于本人专业水平(毕业设计水平)有限，无法对其中的细节做出太细致的说明，难免有纰漏，之后随着学习的深入会回来改正。</p>
+<hr>
+<h2 id="Exploration-of-GeometricField"><a href="#Exploration-of-GeometricField" class="headerlink" title="Exploration of GeometricField"></a>Exploration of GeometricField</h2><h3 id="GeometricField-H"><a href="#GeometricField-H" class="headerlink" title="//GeometricField.H"></a>//GeometricField.H</h3><p>首先文件位置位于<br>OpenFOAM-dev/src/OpenFOAM/fields/GeometricFields/GeometricField/GeometricField.H，代码比较长，只摘取重要的具有代表性的进行说明。</p>
+<ul>
+<li>一系列前置说明不必说，只单列出一个</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="class"><span class="keyword">class</span> <span class="title">Type</span>, <span class="title">template</span>&lt;class&gt; <span class="title">class</span> <span class="title">PatchField</span>, <span class="title">class</span> <span class="title">GeoMesh</span>&gt;</span></span><br><span class="line"><span class="class"><span class="title">Ostream</span>&amp; <span class="title">operator</span>&lt;&lt;</span></span><br><span class="line"><span class="class">(</span></span><br><span class="line"><span class="class">    Ostream&amp;,</span></span><br><span class="line"><span class="class">    const tmp&lt;GeometricField&lt;Type, PatchField, GeoMesh&gt;&gt;&amp;</span></span><br><span class="line"><span class="class">);</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>接下来是类模板的定义，前面也已说过模板参数大致用途，不再细说</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="class"><span class="keyword">class</span> <span class="title">Type</span>, <span class="title">template</span>&lt;class&gt; <span class="title">class</span> <span class="title">PatchField</span>, <span class="title">class</span> <span class="title">GeoMesh</span>&gt;</span></span><br><span class="line"><span class="class"><span class="title">class</span> <span class="title">GeometricField</span></span></span><br><span class="line"><span class="class">:</span></span><br><span class="line">    <span class="keyword">public</span> DimensionedField&lt;Type, GeoMesh&gt;&#123;……&#125;;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>定义了两个私有成员函数。很明显，不是接口，在类内由其他成员调用，判断文件是否存在并进行读取操作，作为类的使用者，无需知道实现细节</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">privite:</span><br><span class="line">    <span class="comment">//- Read from file if it is present</span></span><br><span class="line">    <span class="function"><span class="keyword">bool</span> <span class="title">readIfPresent</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//- Read old time field from file if it is present</span></span><br><span class="line">    <span class="function"><span class="keyword">bool</span> <span class="title">readOldTimeIfPresent</span><span class="params">()</span></span>;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>接下来是一些类内的typedef。定义如下,有Mesh,BoundaryMesh,Internal,Patch,其中Internal经常独立使用，如volScalarField::Internal</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span>:</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Public typedefs</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">//- Type of mesh on which this GeometricField is instantiated</span></span><br><span class="line">        <span class="keyword">typedef</span> <span class="keyword">typename</span> GeoMesh::Mesh Mesh;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//- Type of boundary mesh on which this</span></span><br><span class="line">        <span class="comment">//  GeometricField::Boundary is instantiated</span></span><br><span class="line">        <span class="keyword">typedef</span> <span class="keyword">typename</span> GeoMesh::BoundaryMesh BoundaryMesh;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//- Type of the internal field from which this GeometricField is derived</span></span><br><span class="line">        <span class="keyword">typedef</span> DimensionedField&lt;Type, GeoMesh&gt; Internal;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//- Type of the patch field of which the</span></span><br><span class="line">        <span class="comment">//  GeometricField::Boundary is composed</span></span><br><span class="line">        <span class="keyword">typedef</span> PatchField&lt;Type&gt; Patch;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>之后是Boundary的定义，Bouundary直接定义成了一个类，这个类继承自FieldField。</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Boundary</span></span></span><br><span class="line"><span class="class">    :</span></span><br><span class="line">        <span class="keyword">public</span> FieldField&lt;PatchField, Type&gt;</span><br><span class="line">        &#123;...&#125;;</span><br></pre></td></tr></table></figure>
+<p>具体的实现细节先不管，目前知道FieldField的模板参数是PatchField和Type，只有一个数据成员即之前typedef过的BoundaryMesh，用来存储网格信息</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="comment">//- Reference to BoundaryMesh for which this field is defined</span></span><br><span class="line">    <span class="keyword">const</span> BoundaryMesh&amp; bmesh_;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>然后是Boundary的构造函数，为了代码结构的清晰，Boundary类的源文件和GeometricField的原文件是分开的，Boundary类的成员函数定义位于OpenFOAM-dev/src/OpenFOAM/fields/GeometricFields/GeometricField/GeometricBoundaryField.C<br>来具体摘出几个具有代表性的构造函数来分析一下</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//- Construct from a BoundaryMesh,declaration</span></span><br><span class="line">Boundary(<span class="keyword">const</span> BoundaryMesh&amp;);</span><br></pre></td></tr></table></figure>
+<p>无论何时，传递给构造函数的参数的目的都是用来初始化其数据成员(包括子类的新的数据成员和从父类继承过来的数据成员),上面这个构造构造函数只有一个参数用这个参数初始化了其bmesh_成员和父类的成员。还有如下的构造函数传入三个参数<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"> Boundary</span><br><span class="line">(</span><br><span class="line">    <span class="keyword">const</span> BoundaryMesh&amp;,</span><br><span class="line">    <span class="keyword">const</span> Internal&amp;,</span><br><span class="line">    <span class="keyword">const</span> word&amp;</span><br><span class="line">);</span><br></pre></td></tr></table></figure></p>
+<p>还有拷贝构造函数等不再赘述，用户只需知道怎么传递参数是可接受的即可</p>
+<ul>
+<li>构造函数和公有成员函数及运算符都可算作类的接口，现在来看看Boundary有成员接口,注释已写得很详细，不再画蛇添足</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Member functions</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//- Read the boundary field</span></span><br><span class="line">    <span class="keyword">void</span> readField</span><br><span class="line">    (</span><br><span class="line">        <span class="keyword">const</span> Internal&amp; field,</span><br><span class="line">        <span class="keyword">const</span> dictionary&amp; dict</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">    <span class="comment">//- Update the boundary condition coefficients</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">updateCoeffs</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//- Evaluate boundary conditions</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">evaluate</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//- Return a list of the patch types</span></span><br><span class="line">    <span class="function">wordList <span class="title">types</span><span class="params">()</span> <span class="keyword">const</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//- Return BoundaryField of the cell values neighbouring</span></span><br><span class="line">    <span class="comment">//  the boundary</span></span><br><span class="line">    <span class="function">Boundary <span class="title">boundaryInternalField</span><span class="params">()</span> <span class="keyword">const</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//- Return a list of pointers for each patch field with only those</span></span><br><span class="line">    <span class="comment">//  pointing to interfaces being set</span></span><br><span class="line">    LduInterfaceFieldPtrsList&lt;Type&gt; interfaces() <span class="keyword">const</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//- Return a list of pointers for each patch field with only those</span></span><br><span class="line">    <span class="comment">//  pointing to interfaces being set</span></span><br><span class="line">    <span class="function">lduInterfaceFieldPtrsList <span class="title">scalarInterfaces</span><span class="params">()</span> <span class="keyword">const</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//- Write boundary field as dictionary entry</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">writeEntry</span><span class="params">(<span class="keyword">const</span> word&amp; keyword, Ostream&amp; os)</span> <span class="keyword">const</span></span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// Member operators</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//- Assignment to BoundaryField&lt;Type, PatchField, BoundaryMesh&gt;</span></span><br><span class="line">    <span class="keyword">void</span> <span class="keyword">operator</span>=(<span class="keyword">const</span> Boundary&amp;);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//- Assignment to FieldField&lt;PatchField, Type&gt;</span></span><br><span class="line">    <span class="keyword">void</span> <span class="keyword">operator</span>=(<span class="keyword">const</span> FieldField&lt;PatchField, Type&gt;&amp;);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//- Assignment to Type</span></span><br><span class="line">    <span class="keyword">void</span> <span class="keyword">operator</span>=(<span class="keyword">const</span> Type&amp;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">//- Forced assignment to</span></span><br><span class="line">    <span class="comment">//  BoundaryField&lt;Type, PatchField, BoundaryMesh&gt;</span></span><br><span class="line">    <span class="keyword">void</span> <span class="keyword">operator</span>==(<span class="keyword">const</span> Boundary&amp;);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//- Forced assignment to FieldField&lt;PatchField, Type&gt;</span></span><br><span class="line">    <span class="keyword">void</span> <span class="keyword">operator</span>==(<span class="keyword">const</span> FieldField&lt;PatchField, Type&gt;&amp;);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//- Forced assignment to Type</span></span><br><span class="line">    <span class="keyword">void</span> <span class="keyword">operator</span>==(<span class="keyword">const</span> Type&amp;);</span><br></pre></td></tr></table></figure>
+<ul>
+<li>回到GeometricField，私有成员有，时间下标timeIndex_, 指向前面时间的指针field0Ptr_和指向前一次迭代的指针fieldPrevIterPtr_，以及Boundary类型的boundaryField_</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span>:</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Private data</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">//- Current time index.</span></span><br><span class="line">        <span class="comment">//  Used to trigger the storing of the old-time value</span></span><br><span class="line">        <span class="keyword">mutable</span> label timeIndex_;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//- Pointer to old time field</span></span><br><span class="line">        <span class="keyword">mutable</span> GeometricField&lt;Type, PatchField, GeoMesh&gt;* field0Ptr_;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//-  Pointer to previous iteration (used for under-relaxation)</span></span><br><span class="line">        <span class="keyword">mutable</span> GeometricField&lt;Type, PatchField, GeoMesh&gt;* fieldPrevIterPtr_;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//- Boundary Type field containing boundary field values</span></span><br><span class="line">        Boundary boundaryField_;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Private Member Functions</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">//- Read the field from the dictionary</span></span><br><span class="line">        <span class="function"><span class="keyword">void</span> <span class="title">readFields</span><span class="params">(<span class="keyword">const</span> dictionary&amp;)</span></span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//- Read the field - create the field dictionary on-the-fly</span></span><br><span class="line">        <span class="function"><span class="keyword">void</span> <span class="title">readFields</span><span class="params">()</span></span>;</span><br></pre></td></tr></table></figure>
+<p>-GeometricField类的构造函数很多，仅构造函数的声明就有100多行，但目前对我而言使用最多的只有4个</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//- Construct and read given IOobject</span></span><br><span class="line">        GeometricField</span><br><span class="line">        (</span><br><span class="line">            <span class="keyword">const</span> IOobject&amp;,</span><br><span class="line">            <span class="keyword">const</span> Mesh&amp;</span><br><span class="line">        );</span><br><span class="line">        </span><br><span class="line"><span class="comment">//- Construct as copy</span></span><br><span class="line">        GeometricField</span><br><span class="line">        (</span><br><span class="line">            <span class="keyword">const</span> GeometricField&lt;Type, PatchField, GeoMesh&gt;&amp;</span><br><span class="line">        );</span><br><span class="line">        </span><br><span class="line"><span class="comment">//- Construct as copy resetting IO parameters</span></span><br><span class="line">        GeometricField</span><br><span class="line">        (</span><br><span class="line">            <span class="keyword">const</span> IOobject&amp;,</span><br><span class="line">            <span class="keyword">const</span> GeometricField&lt;Type, PatchField, GeoMesh&gt;&amp;</span><br><span class="line">        );</span><br><span class="line">        </span><br><span class="line"><span class="comment">//- Construct as copy resetting name</span></span><br><span class="line">        GeometricField</span><br><span class="line">        (</span><br><span class="line">            <span class="keyword">const</span> word&amp; newName,</span><br><span class="line">            <span class="keyword">const</span> GeometricField&lt;Type, PatchField, GeoMesh&gt;&amp;</span><br><span class="line">        );</span><br></pre></td></tr></table></figure>
+<p>所以主要手段还是通过新建IOobject给出mesh来创建新的场量，或者直接复制也很常用，之后把所有构造函数都列出来</p>
+<ul>
+<li>析构函数需要将指针删除</li>
+</ul>
+<ul>
+<li>还有一些成员函数和类运算符如下，其注释已经很详细，不再赘述</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/03/29/OpenFOAM中常用的数据类型GeometricField/" data-id="cjfcd5g1d0000x86jivhiubfi" class="article-share-link">Teilen</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2018/03/15/OpenFOAM中的dimensionedType类模板解析/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">OpenFOAM的基本运算数据类型:dimensionedType</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">March 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/03/29/OpenFOAM中常用的数据类型GeometricField/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/15/OpenFOAM中的dimensionedType类模板解析/">OpenFOAM的基本运算数据类型:dimensionedType</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/14/hello-world/">Hello World</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>
